@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>饩雨的妙妙屋 - Minecraft服务器</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Minecraft', 'Microsoft YaHei', sans-serif;
+        }
+        
+        @font-face {
+            font-family: 'Minecraft';
+            src: url('https://assets.codepen.io/4175254/Minecraft.woff2') format('woff2');
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1f25 0%, #0d1117 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(40, 120, 60, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(80, 160, 100, 0.1) 0%, transparent 20%);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+        
+        header {
+            padding: 40px 0;
+            position: relative;
+        }
+        
+        .server-name {
+            font-size: 4.5rem;
+            color: #6bcb6b;
+            text-shadow: 
+                0 0 10px rgba(107, 203, 107, 0.5),
+                0 0 20px rgba(107, 203, 107, 0.3),
+                0 0 30px rgba(107, 203, 107, 0.2);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .server-name::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 250px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #6bcb6b, transparent);
+            border-radius: 2px;
+        }
+        
+        .server-tagline {
+            font-size: 1.8rem;
+            color: #a0d8a0;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(160, 216, 160, 0.5);
+        }
+        
+        .server-ip {
+            font-size: 1.5rem;
+            background: rgba(30, 40, 30, 0.6);
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 30px;
+            margin: 15px 0 30px;
+            border: 2px solid #4a7a4a;
+            box-shadow: 0 0 15px rgba(107, 203, 107, 0.4);
+            font-weight: bold;
+            color: #e0f0e0;
+        }
+        
+        .server-ip span {
+            color: #ffd700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+            letter-spacing: 1px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 15px;
+            border-radius: 15px;
+            margin-left: 10px;
+            font-family: monospace;
+        }
+        
+        .canvas-container {
+            width: 400px;
+            height: 400px;
+            margin: 0 auto 40px;
+            position: relative;
+            perspective: 1000px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 30px rgba(107, 203, 107, 0.3),
+                inset 0 0 20px rgba(0, 0, 0, 0.5);
+            background: rgba(20, 30, 20, 0.3);
+            border: 2px solid #3a6a3a;
+        }
+        
+        #blockCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .info-card {
+            background: rgba(30, 40, 30, 0.4);
+            border: 2px solid #4a7a4a;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: left;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .info-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(107, 203, 107, 0.3);
+            background: rgba(40, 50, 40, 0.5);
+        }
+        
+        .card-title {
+            color: #8bc34a;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.5rem;
+        }
+        
+        .card-content {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d0e0d0;
+        }
+        
+        .card-highlight {
+            color: #6bcb6b;
+            font-weight: bold;
+        }
+        
+        .qq-group {
+            display: inline-block;
+            background: linear-gradient(135deg, #4a7a4a, #3a6a3a);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #6bcb6b;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .qq-group::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+        }
+        
+        .qq-group:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(107, 203, 107, 0.4);
+            background: linear-gradient(135deg, #5a8a5a, #4a7a4a);
+        }
+        
+        .qq-group:hover::before {
+            transform: rotate(30deg) translate(100px, 100px);
+        }
+        
+        .server-description {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: rgba(20, 30, 20, 0.4);
+            border-radius: 15px;
+            border: 2px solid #4a7a4a;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .server-description::before {
+            content: """;
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4rem;
+            color: #6bcb6b;
+        }
+        
+        .pixel-art {
+            position: absolute;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .creeper {
+            top: 10%;
+            left: 5%;
+            font-size: 2rem;
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        .steve {
+            bottom: 20%;
+            right: 8%;
+            font-size: 3rem;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        .zombie {
+            top: 30%;
+            right: 10%;
+            font-size: 2.5rem;
+            animation: float 7s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        footer {
+            margin-top: 60px;
+            padding: 20px;
+            color: #8a9a8a;
+            font-size: 1.1rem;
+            border-top: 1px solid #3a4a3a;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .server-name {
+                font-size: 3rem;
+            }
+            
+            .server-tagline {
+                font-size: 1.4rem;
+            }
+            
+            .server-ip {
+                font-size: 1.2rem;
+                padding: 8px 15px;
+            }
+            
+            .canvas-container {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 粒子背景效果 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background-color: rgba(107, 203, 107, 0.3);
+            border-radius: 50%;
+            animation: particleAnim 15s infinite linear;
+        }
+        
+        @keyframes particleAnim {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* 3D旋转提示 */
+        .rotate-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #a0d8a0;
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px rgba(160, 216, 160, 0.5);
+            background: rgba(20, 30, 20, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* 服务器IP复制按钮 */
+        .copy-btn {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            border-radius: 15px;
+            padding: 3px 10px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 215, 0, 0.4);
+        }
+        
+        .copy-notice {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 40, 30, 0.9);
+            color: #6bcb6b;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #4a7a4a;
+            box-shadow: 0 0 15px rgba(107, 203, 107, 0.5);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .copy-notice.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 像素艺术装饰 -->
+    <div class="pixel-art creeper">🟩🟩🟩🟩<br>🟩🟫🟫🟩<br>🟫🟫🟫🟫<br>🟫⬜⬛🟫<br>🟫⬛⬛🟫<br>🟩🟫🟫🟩</div>
+    <div class="pixel-art steve">🟦🟦🟦🟦<br>🟦🟫🟫🟦<br>🟫⬜⬜🟫<br>🟫⬛⬛🟫<br>🟫🟫🟫🟫<br>⬜⬜⬜⬜</div>
+    <div class="pixel-art zombie">🟩🟩🟩🟩<br>🟩🟫🟫🟩<br>🟫⬛⬜🟫<br>🟫⬜⬛🟫<br>🟫🟫🟫🟫<br>⬜⬛⬛⬜</div>
+    
+    <!-- 粒子背景 -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- 复制提示 -->
+    <div class="copy-notice" id="copyNotice">IP地址已复制到剪贴板！</div>
+    
+    <div class="container">
+        <header>
+            <h1 class="server-name">饩雨的妙妙屋</h1>
+            <p class="server-tagline">温馨小服 · 休闲养老 · 自由无拘</p>
+            
+            <div class="server-ip">
+                服务器IP: 
+                <span id="serverIp">server.minecraftstl.space:45565</span>
+                <button class="copy-btn" id="copyBtn">复制</button>
+            </div>
+            
+            <div class="canvas-container">
+                <canvas id="blockCanvas"></canvas>
+                <div class="rotate-hint">← 拖动鼠标可旋转方块 →</div>
+            </div>
+        </header>
+        
+        <main>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h2 class="card-title"><i>🔧</i> 服务端配置</h2>
+                    <p class="card-content">基于 <span class="card-highlight">Arclight</span> 服务端<br>
+                        <span class="card-highlight">NeoForge + Bukkit</span> 兼容<br>
+                        支持 <span class="card-highlight">ViaVersion</span> 跨版本<br>
+                        当前版本：<span class="card-highlight">Minecraft 1.21.1</span></p>
+                </div>
+                
+                <div class="info-card">
+                    <h2 class="card-title"><i>🎮</i> 游戏特色</h2>
+                    <p class="card-content">纯生存 <span class="card-highlight">休闲养老</span> 玩法<br>
+                        <span class="card-highlight">无红石限制</span>，自由创造<br>
+                        友好社区，<span class="card-highlight">无复杂规则</span><br>
+                        长期稳定，存档<span class="card-highlight">永不删档</span></p>
+                </div>
+                
+                <div class="info-card">
+                    <h2 class="card-title"><i>👥</i> 加入我们</h2>
+                    <p class="card-content">新玩家<span class="card-highlight">友好</span>，随时欢迎<br>
+                        活跃<span class="card-highlight">小社区</span>，互相帮助<br>
+                        定期<span class="card-highlight">创意投稿</span>与创意实装<br>
+                        技术问题<span class="card-highlight">即时解决</span></p>
+                </div>
+            </div>
+            
+            <a href="https://qm.qq.com/q/APF6aJCQ1i" target="_blank" class="qq-group">
+                <i>👥</i> 加入QQ群: 973951057
+            </a>
+            
+            <div class="server-description">
+                在饩雨的妙妙屋，我们打造了一个轻松自由的Minecraft世界。这里没有繁琐的规则限制，没有商业化的压力，只有纯粹的生存乐趣和友好的玩家社区。无论你是建筑大师、红石工程师，还是喜欢探险的冒险家，这里都是你的理想家园。
+            </div>
+        </main>
+        
+        <footer>
+            <p>© 2025 饩雨的妙妙屋 Minecraft 服务器 | 温馨小服，休闲养老</p>
+        </footer>
+    </div>
+
+    <script>
+        // 初始化Three.js场景
+        let scene, camera, renderer, cube;
+        let autoRotate = true;
+        
+        function init() {
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0d1117);
+            scene.fog = new THREE.FogExp2(0x1a1f25, 0.02);
+            
+            // 创建相机
+            camera = new THREE.PerspectiveCamera(75, 400 / 400, 0.1, 1000);
+            camera.position.z = 5;
+            
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('blockCanvas'),
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(400, 400);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // 创建立方体
+            const geometry = new THREE.BoxGeometry(2.5, 2.5, 2.5);
+            
+            // 创建草方块纹理 - 使用本地文件
+            const loader = new THREE.TextureLoader();
+            
+            // 使用本地纹理文件
+            const topTexture = loader.load('tou.png');
+            const sideTexture = loader.load('ce.png');
+            const bottomTexture = loader.load('di.png');
+            
+            // 设置纹理过滤为最近邻，保持像素风格
+            topTexture.magFilter = THREE.NearestFilter;
+            sideTexture.magFilter = THREE.NearestFilter;
+            bottomTexture.magFilter = THREE.NearestFilter;
+            
+            // 创建不同面的材质
+            const materials = [
+                new THREE.MeshLambertMaterial({ map: sideTexture }), // 右面
+                new THREE.MeshLambertMaterial({ map: sideTexture }), // 左面
+                new THREE.MeshLambertMaterial({ map: topTexture }),  // 上面
+                new THREE.MeshLambertMaterial({ map: bottomTexture }), // 下面
+                new THREE.MeshLambertMaterial({ map: sideTexture }), // 前面
+                new THREE.MeshLambertMaterial({ map: sideTexture })  // 后面
+            ];
+            
+            // 创建网格
+            cube = new THREE.Mesh(geometry, materials);
+            scene.add(cube);
+            
+            // 添加灯光
+            const ambientLight = new THREE.AmbientLight(0x606060, 3);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+            
+            const pointLight = new THREE.PointLight(0x6bcb6b, 1, 100);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+            
+            // 添加轨道控制
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 0.5;
+            
+            // 当用户开始交互时停止自动旋转
+            controls.addEventListener('start', () => {
+                autoRotate = false;
+            });
+            
+            // 添加动画
+            animate();
+            
+            // 响应窗口大小变化
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 添加一些旋转动画
+            if (autoRotate) {
+                cube.rotation.x += 0.002;
+                cube.rotation.y += 0.003;
+            }
+            
+            // 更新控制器
+            if (THREE.OrbitControls) {
+                const controls = THREE.OrbitControls;
+                if (controls && controls.update) controls.update();
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = 400 / 400;
+            camera.updateProjectionMatrix();
+            renderer.setSize(400, 400);
+        }
+        
+        // 创建粒子背景
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#6bcb6b', '#8bc34a', '#4CAF50', '#388E3C', '#2E7D32'];
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // 随机属性
+                const size = Math.random() * 10 + 5;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100 + 100; // 从底部开始
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const duration = Math.random() * 10 + 10;
+                const delay = Math.random() * 5;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.backgroundColor = color;
+                particle.style.left = `${posX}%`;
+                particle.style.bottom = `-${size}px`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+        
+        // IP复制功能
+        function setupCopyButton() {
+            const copyBtn = document.getElementById('copyBtn');
+            const serverIp = document.getElementById('serverIp');
+            const copyNotice = document.getElementById('copyNotice');
+            
+            copyBtn.addEventListener('click', () => {
+                const textArea = document.createElement('textarea');
+                textArea.value = serverIp.textContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                // 显示复制成功提示
+                copyNotice.classList.add('show');
+                
+                setTimeout(() => {
+                    copyNotice.classList.remove('show');
+                }, 2000);
+            });
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            init();
+            createParticles();
+            setupCopyButton();
+        });
+    </script>
+</body>
+</html>
