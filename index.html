@@ -115,6 +115,82 @@
             font-family: monospace;
         }
         
+        .server-status {
+            background: rgba(20, 30, 20, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+            border: 2px solid #4a7a4a;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #1a1f25;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #4a7a4a;
+        }
+        
+        .status-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .status-info {
+            text-align: left;
+            flex: 1;
+        }
+        
+        .status-motd {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            min-height: 30px;
+        }
+        
+        .status-players {
+            font-size: 1.2rem;
+            color: #a0d8a0;
+            margin-bottom: 8px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .status-online {
+            background: rgba(40, 160, 40, 0.3);
+            color: #6bcb6b;
+            border: 1px solid #4a7a4a;
+        }
+        
+        .status-offline {
+            background: rgba(160, 40, 40, 0.3);
+            color: #ff6b6b;
+            border: 1px solid #7a4a4a;
+        }
+        
+        .status-maintenance {
+            background: rgba(200, 160, 40, 0.3);
+            color: #ffd700;
+            border: 1px solid #7a6a4a;
+        }
+        
         .canvas-container {
             width: 400px;
             height: 400px;
@@ -300,6 +376,15 @@
                 padding: 8px 15px;
             }
             
+            .server-status {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .status-info {
+                text-align: center;
+            }
+            
             .canvas-container {
                 width: 300px;
                 height: 300px;
@@ -407,9 +492,26 @@
 </head>
 <body>
     <!-- 像素艺术装饰 -->
-    <div class="pixel-art creeper">🟩🟩🟩🟩<br>🟩🟫🟫🟩<br>🟫🟫🟫🟫<br>🟫⬜⬛🟫<br>🟫⬛⬛🟫<br>🟩🟫🟫🟩</div>
-    <div class="pixel-art steve">🟦🟦🟦🟦<br>🟦🟫🟫🟦<br>🟫⬜⬜🟫<br>🟫⬛⬛🟫<br>🟫🟫🟫🟫<br>⬜⬜⬜⬜</div>
-    <div class="pixel-art zombie">🟩🟩🟩🟩<br>🟩🟫🟫🟩<br>🟫⬛⬜🟫<br>🟫⬜⬛🟫<br>🟫🟫🟫🟫<br>⬜⬛⬛⬜</div>
+    <div class="pixel-art creeper">🟩🟩🟩🟩🟩🟩🟩🟩<br>🟩⬛⬛🟩🟩⬛⬛🟩<br>🟩⬛⬜⬛⬛⬜⬛🟩<br>🟩🟩🟩⬛⬛🟩🟩🟩<br>🟩⬛⬛⬛⬛⬛⬛🟩<br>🟩⬛⬛🟩🟩⬛⬛🟩<br>🟩🟩🟩🟩🟩🟩🟩🟩</div>
+    <div class="pixel-art steve">
+🟫🟫🟫🟫🟫🟫🟫🟫<br>
+🟫🟫🟫🟫🟫🟫🟫🟫<br>
+🟫⬛⬛⬜⬜⬛⬛🟫<br>
+🟫⬛⬛⬜⬜⬛⬛🟫<br>
+🟫🟫🟫⬛⬛🟫🟫🟫<br>
+🟫🟧🟫🟧🟧🟫🟧🟫<br>
+🟦🟦🟦🟦🟦🟦🟦🟦
+</div>
+
+    <div class="pixel-art zombie">
+🟩🟩🟩🟩🟩🟩🟩🟩<br>
+🟩🟩🟩🟩🟩🟩🟩🟩<br>
+🟩⬛⬛🟩🟩⬛⬛🟩<br>
+🟩🟩🟩🟫🟫🟩🟩🟩<br>
+🟩🟩🟫🟩🟩🟫🟩🟩<br>
+🟩🟩🟫🟩🟩🟫🟩🟩<br>
+🟩🟩🟩🟩🟩🟩🟩🟩
+</div>
     
     <!-- 粒子背景 -->
     <div class="particles" id="particles"></div>
@@ -426,6 +528,20 @@
                 服务器IP: 
                 <span id="serverIp">server.minecraftstl.space:45565</span>
                 <button class="copy-btn" id="copyBtn">复制</button>
+            </div>
+            
+            <!-- 服务器状态显示 -->
+            <div class="server-status">
+                <div class="status-icon">
+                    <img id="serverIcon" src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/9/91/Grass_Block_%28item%29_JE4_BE3.png" alt="服务器图标">
+                </div>
+                <div class="status-info">
+                    <div class="status-motd" id="serverMotd">温馨小服 · 休闲养老 · 自由无拘</div>
+                    <div class="status-players">玩家: <span id="onlinePlayers">?</span> / <span id="maxPlayers">?</span></div>
+                    <div class="status-indicator status-online" id="statusIndicator">
+                        状态: <span id="serverStatus">在线</span>
+                    </div>
+                </div>
             </div>
             
             <div class="canvas-container">
@@ -635,11 +751,51 @@
             });
         }
         
+        // 模拟服务器状态检查
+       function checkServerStatus() {
+    	const onlinePlayers = document.getElementById('onlinePlayers');
+    	const maxPlayers = document.getElementById('maxPlayers');
+    	const serverStatus = document.getElementById('serverStatus');
+   	const statusIndicator = document.getElementById('statusIndicator');
+
+    	fetch('https://api.mcsrvstat.us/2/server.minecraftstl.space:45565')
+        	.then(response => response.json())
+        	.then(data => {
+            	if (data.online) {
+                // 在线状态
+                	const players = data.players || {};
+                	onlinePlayers.textContent = players.online ?? '0';
+                	maxPlayers.textContent = players.max ?? '0';
+                	serverStatus.textContent = '在线';
+                	statusIndicator.className = 'status-indicator status-online';
+            	} else {
+                // 离线状态
+                	onlinePlayers.textContent = '0';
+                	maxPlayers.textContent = '0';
+                	serverStatus.textContent = '离线';
+                	statusIndicator.className = 'status-indicator status-offline';
+            	}
+        	})
+        	.catch(error => {
+            // 连接失败或服务器异常时，显示“维护中”
+            	console.error('无法获取服务器状态:', error);
+            	onlinePlayers.textContent = '0';
+            	maxPlayers.textContent = '0';
+            	serverStatus.textContent = '维护中';
+            	statusIndicator.className = 'status-indicator status-maintenance';
+        	});
+
+    	// 每 30 秒刷新一次
+    	setTimeout(checkServerStatus, 30000);
+	}
+
+        
         // 页面加载完成后初始化
         window.addEventListener('load', () => {
             init();
             createParticles();
             setupCopyButton();
+            checkServerStatus(); // 初始化服务器状态
         });
     </script>
 </body>
