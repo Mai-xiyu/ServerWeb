@@ -451,7 +451,7 @@
                     避免过于常见的赛博霓虹效果。
                 </p>
                 <div class="hero-actions">
-                    <button class="primary-btn" type="button" id="copy-ip-btn">复制服务器地址：mc.mai-xiyu.top</button>
+                    <button class="primary-btn" type="button" id="copy-ip-btn">复制服务器地址</button>
                     <a class="secondary-btn" href="https://qm.qq.com/q/JbWcIF8Q8K" target="_blank" rel="noreferrer">加入 QQ 群</a>
                 </div>
             </div>
@@ -460,7 +460,7 @@
                 <div class="metric-list">
                     <div class="metric-row">
                         <span class="metric-label">连接地址</span>
-                        <strong class="metric-value">mc.mai-xiyu.top</strong>
+                        <strong class="metric-value" id="metric-host">--</strong>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">实时状态</span>
@@ -590,7 +590,11 @@
         const metricPlayers = document.getElementById('metric-players');
         const metricVersion = document.getElementById('metric-version');
         const metricUpdated = document.getElementById('metric-updated');
+        const metricHost = document.getElementById('metric-host');
         const copyButton = document.getElementById('copy-ip-btn');
+
+        copyButton.textContent = `复制服务器地址：${SERVER_HOST}`;
+        metricHost.textContent = SERVER_HOST;
 
         function formatCheckedTime(date) {
             return new Intl.DateTimeFormat('zh-CN', {
@@ -631,7 +635,7 @@
                 const data = await response.json();
                 return {
                     source: source.name,
-                    latency: Math.max(1, Math.round(performance.now() - start)),
+                    latency: Math.round(performance.now() - start),
                     ...source.parse(data)
                 };
             } finally {
@@ -698,7 +702,7 @@
             } catch (error) {
                 copyButton.textContent = error?.message === 'clipboard-unavailable'
                     ? '当前浏览器不支持自动复制'
-                    : '复制被拒绝，请手动复制';
+                    : '复制失败，请手动选择地址或检查权限';
             }
 
             window.setTimeout(() => {
