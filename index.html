@@ -5,564 +5,898 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>饩雨的妙妙屋 - 群组服务器</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💠</text></svg>">
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- GSAP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #050508;
-            --neon-green: #00ff9d; /* Survival */
-            --neon-purple: #bd00ff; /* Modded */
-            --neon-blue: #00f3ff; /* Tech */
-            --glass: rgba(10, 15, 20, 0.7);
-            --border: rgba(255, 255, 255, 0.1);
-        }
-        
-        @font-face {
-            font-family: 'Minecraft';
-            src: url('https://assets.codepen.io/4175254/Minecraft.woff2') format('woff2');
+            color-scheme: dark;
+            --bg: #09111f;
+            --bg-soft: rgba(9, 17, 31, 0.72);
+            --panel: rgba(255, 255, 255, 0.1);
+            --panel-soft: rgba(255, 255, 255, 0.06);
+            --panel-strong: rgba(255, 255, 255, 0.14);
+            --border: rgba(255, 255, 255, 0.18);
+            --text: #f5f7fb;
+            --muted: rgba(245, 247, 251, 0.72);
+            --accent: #8bc4ff;
+            --accent-strong: #61a8ff;
+            --success: #78dba9;
+            --danger: #ff9f9f;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
-        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: var(--bg-dark);
-            color: #fff;
-            font-family: 'Rajdhani', sans-serif;
-            overflow-x: hidden;
             min-height: 100vh;
+            font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(139, 196, 255, 0.28), transparent 32%),
+                radial-gradient(circle at top right, rgba(138, 233, 196, 0.14), transparent 25%),
+                linear-gradient(160deg, #09111f 0%, #10192d 48%, #1b2742 100%);
+            overflow-x: hidden;
         }
 
-        /* Custom Cursor */
-        #cursor {
-            width: 20px; height: 20px;
-            border: 2px solid #fff;
-            position: fixed; pointer-events: none; z-index: 9999;
-            transform: translate(-50%, -50%) rotate(45deg);
-            transition: all 0.1s ease-out;
-            mix-blend-mode: difference;
-        }
-        #cursor.hovered {
-            width: 50px; height: 50px;
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--neon-blue);
-            transform: translate(-50%, -50%) rotate(0deg);
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            width: 24rem;
+            height: 24rem;
+            border-radius: 999px;
+            filter: blur(30px);
+            z-index: 0;
+            pointer-events: none;
         }
 
-        /* Background */
-        .stars {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%);
-            z-index: -2;
-        }
-        .grid-floor {
-            position: fixed; bottom: -20%; left: -50%; width: 200%; height: 100%;
-            background: 
-                linear-gradient(transparent 0%, rgba(0, 243, 255, 0.05) 2%, transparent 3%),
-                linear-gradient(90deg, transparent 0%, rgba(0, 243, 255, 0.05) 2%, transparent 3%);
-            background-size: 100px 100px;
-            transform: perspective(500px) rotateX(60deg);
-            animation: gridMove 20s linear infinite;
-            z-index: -1; pointer-events: none;
-        }
-        @keyframes gridMove { 0% { transform: perspective(500px) rotateX(60deg) translateY(0); } 100% { transform: perspective(500px) rotateX(60deg) translateY(100px); } }
-
-        /* Layout */
-        .container {
-            max-width: 1400px; margin: 0 auto; padding: 0 40px;
-            position: relative; z-index: 10;
+        body::before {
+            top: -8rem;
+            left: -7rem;
+            background: rgba(116, 182, 255, 0.18);
         }
 
-        /* Header */
+        body::after {
+            right: -8rem;
+            bottom: -8rem;
+            background: rgba(120, 219, 169, 0.12);
+        }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            width: min(1180px, calc(100% - 32px));
+            margin: 24px auto;
+            padding: 28px;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            background: rgba(10, 16, 29, 0.44);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            overflow: hidden;
+        }
+
+        .shell::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 18%);
+            pointer-events: none;
+        }
+
         header {
-            padding: 30px 0; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .logo {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.5rem;
-            letter-spacing: 2px; color: #fff;
-        }
-        .logo span { color: var(--neon-blue); }
 
-        /* Hero */
+        .brand-title {
+            font-size: clamp(1.3rem, 2vw, 1.7rem);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .brand-subtitle {
+            margin-top: 6px;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text);
+            font-size: 0.95rem;
+            white-space: nowrap;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f6c56f;
+            box-shadow: 0 0 0 6px rgba(246, 197, 111, 0.14);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .status-pill.online .status-dot {
+            background: var(--success);
+            box-shadow: 0 0 0 6px rgba(120, 219, 169, 0.14);
+            animation: pulse 2.2s ease-in-out infinite;
+        }
+
+        .status-pill.offline .status-dot {
+            background: var(--danger);
+            box-shadow: 0 0 0 6px rgba(255, 159, 159, 0.14);
+        }
+
         .hero {
-            min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; position: relative;
-        }
-        
-        .hero-badge {
-            background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-blue);
-            padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; letter-spacing: 2px;
-            color: var(--neon-blue); margin-bottom: 20px; text-transform: uppercase;
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+            gap: 28px;
+            padding: 46px 0 34px;
+            align-items: stretch;
         }
 
-        .hero-title {
-            font-family: 'Orbitron', sans-serif; font-size: clamp(3rem, 8vw, 7rem);
-            font-weight: 900; line-height: 1; margin-bottom: 10px;
-            background: linear-gradient(to right, #fff, #aaa);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        
-        .hero-subtitle {
-            font-size: 1.5rem; color: #888; margin-bottom: 40px;
-            font-family: 'Rajdhani', sans-serif; letter-spacing: 5px;
+        .hero-card,
+        .glass-card {
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: var(--bg-soft);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
         }
 
-        /* IP Copy */
-        .ip-wrapper {
-            position: relative; display: inline-block;
+        .hero-card {
+            padding: 36px;
+            position: relative;
+            overflow: hidden;
         }
-        .ip-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
-            padding: 20px 50px; font-family: 'Minecraft', monospace; font-size: 1.2rem;
-            color: #fff; clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
-            transition: 0.3s; position: relative; overflow: hidden;
-        }
-        .ip-btn::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: 0.5s;
-        }
-        .ip-btn:hover {
-            background: rgba(255,255,255,0.1); border-color: var(--neon-blue);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
-            text-shadow: 0 0 10px var(--neon-blue);
-        }
-        .ip-btn:hover::before { left: 100%; }
 
-        /* Servers Section */
-        .servers-section {
-            padding: 100px 0;
+        .hero-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.22), transparent 72%);
+            pointer-events: none;
         }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -12% -40% auto;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 196, 255, 0.22), transparent 68%);
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            margin-bottom: 18px;
+            background: rgba(139, 196, 255, 0.12);
+            color: #d9ecff;
+            font-size: 0.9rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .eyebrow-icon,
+        .section-icon,
+        .server-badge-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.6rem, 5.5vw, 4.8rem);
+            line-height: 1.08;
+            letter-spacing: 0.03em;
+            text-shadow: 0 0 28px rgba(139, 196, 255, 0.12);
+        }
+
+        .hero p {
+            margin-top: 18px;
+            max-width: 42rem;
+            font-size: 1.08rem;
+            line-height: 1.85;
+            color: var(--muted);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 28px;
+            align-items: stretch;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            border: 0;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            text-decoration: none;
+            justify-content: center;
+            align-items: center;
+            display: inline-flex;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: #06111f;
+            font-weight: 700;
+            box-shadow: 0 12px 28px rgba(97, 168, 255, 0.28);
+        }
+
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .primary-btn:hover,
+        .secondary-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero-side {
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .metric-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.06));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .metric-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .metric-icon {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #e4f1ff;
+            flex-shrink: 0;
+        }
+
+        .metric-row.metric-host .metric-icon,
+        .metric-row.metric-latency .metric-icon {
+            background: rgba(139, 196, 255, 0.14);
+        }
+
+        .metric-row.metric-status .metric-icon,
+        .metric-row.metric-players .metric-icon {
+            background: rgba(120, 219, 169, 0.14);
+        }
+
+        .metric-row.metric-version .metric-icon,
+        .metric-row.metric-updated .metric-icon {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .status-note {
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(120, 219, 169, 0.08), rgba(139, 196, 255, 0.08));
+            color: #d8f7e6;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .section {
+            margin-top: 30px;
+        }
+
         .section-header {
-            text-align: center; margin-bottom: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 18px;
+            margin-bottom: 22px;
         }
+
         .section-title {
-            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin-bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 700;
         }
-        .section-desc { color: #666; letter-spacing: 2px; }
+
+        .section-desc {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.75;
+        }
 
         .server-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 40px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
         }
-        
+
         .server-card {
-            background: var(--glass); border: 1px solid var(--border);
-            padding: 40px; position: relative; overflow: hidden;
-            transition: 0.5s; height: 400px; display: flex; flex-direction: column; justify-content: flex-end;
-        }
-        
-        .server-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at top right, rgba(255,255,255,0.05), transparent 60%);
-            z-index: 0;
+            padding: 26px;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Modded Server Style */
-        .card-modded { border-left: 4px solid var(--neon-purple); }
-        .card-modded:hover { 
-            box-shadow: 0 0 50px rgba(189, 0, 255, 0.2); 
-            border-color: var(--neon-purple);
-        }
-        .card-modded .card-icon { color: var(--neon-purple); }
-        .card-modded .card-bg {
-            position: absolute; top: -50%; right: -20%; width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(189, 0, 255, 0.1) 0%, transparent 70%);
-            filter: blur(40px); transition: 0.5s;
+        .server-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -3rem -4rem auto;
+            width: 10rem;
+            height: 10rem;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 196, 255, 0.16), transparent 68%);
+            pointer-events: none;
         }
 
-        /* Survival Server Style */
-        .card-survival { border-left: 4px solid var(--neon-green); }
-        .card-survival:hover { 
-            box-shadow: 0 0 50px rgba(0, 255, 157, 0.2); 
-            border-color: var(--neon-green);
-        }
-        .card-survival .card-icon { color: var(--neon-green); }
-        .card-survival .card-bg {
-            position: absolute; top: -50%; right: -20%; width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(0, 255, 157, 0.1) 0%, transparent 70%);
-            filter: blur(40px); transition: 0.5s;
+        .server-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 16px;
         }
 
-        .server-card:hover .card-bg { transform: scale(1.2); opacity: 0.8; }
-
-        .card-content { position: relative; z-index: 2; }
-        .card-icon { font-size: 3rem; margin-bottom: 20px; }
-        .card-title {
-            font-family: 'Orbitron', sans-serif; font-size: 2rem; margin-bottom: 10px;
-        }
-        .card-version {
-            display: inline-block; padding: 5px 10px; background: rgba(255,255,255,0.1);
-            border-radius: 4px; font-family: 'Minecraft'; font-size: 0.9rem; margin-bottom: 20px;
-        }
-        .card-desc { color: #aaa; line-height: 1.6; font-size: 1.1rem; max-width: 90%; }
-
-        /* 3D Container */
-        #canvas-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; opacity: 0.6; pointer-events: none;
+        .server-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.86rem;
+            background: rgba(255, 255, 255, 0.08);
+            color: #dce9f8;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
-        /* Footer */
+        .server-card h3 {
+            margin-top: 14px;
+            font-size: 1.5rem;
+        }
+
+        .server-version {
+            margin-top: 10px;
+            color: #d8e8ff;
+            font-size: 0.98rem;
+        }
+
+        .server-card p {
+            margin-top: 16px;
+            color: var(--muted);
+            line-height: 1.92;
+        }
+
+        .server-tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .server-tag {
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #dce7f6;
+            font-size: 0.9rem;
+            border: 1px solid rgba(139, 196, 255, 0.16);
+        }
+
+        .community-card {
+            margin-top: 22px;
+            padding: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .community-copy {
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        .community-card .primary-btn {
+            flex-shrink: 0;
+        }
+
         footer {
-            border-top: 1px solid var(--border); padding: 40px 0;
-            text-align: center; color: #444; font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .server-grid { grid-template-columns: 1fr; }
-            .hero-title { font-size: 3.5rem; }
-        }
-        /* Minecraft Legacy Section - Cyber Style */
-        .mc-section {
-            padding: 100px 0;
-            position: relative;
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
-            /* Remove dirt background, let the global space background show through */
-        }
-        
-        .mc-container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: rgba(0, 20, 10, 0.6); /* Dark Glass */
-            border: 1px solid var(--neon-green);
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 0 30px rgba(0, 255, 157, 0.1);
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-        
-        .mc-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 50px rgba(0, 255, 157, 0.2);
+            color: rgba(245, 247, 251, 0.55);
+            font-size: 0.92rem;
         }
 
-        /* Decorative corner markers */
-        .mc-container::before, .mc-container::after {
-            content: ''; position: absolute; width: 20px; height: 20px;
-            border: 2px solid var(--neon-green); transition: all 0.3s;
-        }
-        .mc-container::before { top: 0; left: 0; border-right: 0; border-bottom: 0; }
-        .mc-container::after { bottom: 0; right: 0; border-left: 0; border-top: 0; }
-
-        .mc-title {
-            font-family: 'Minecraft', sans-serif; /* Keep the pixel font */
-            font-size: 2rem;
-            margin-bottom: 15px;
-            color: var(--neon-green);
-            text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
-            letter-spacing: 2px;
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.08);
+            }
         }
 
-        .mc-desc {
-            font-size: 1.1rem;
-            color: #ccc;
-            margin-bottom: 30px;
-            line-height: 1.6;
+        @media (max-width: 960px) {
+            .hero,
+            .server-grid,
+            .community-card {
+                grid-template-columns: 1fr;
+                display: grid;
+            }
+
+            .community-card {
+                justify-content: initial;
+            }
         }
 
-        .mc-btn {
-            display: inline-block;
-            background: transparent;
-            border: 1px solid var(--neon-green);
-            padding: 12px 40px;
-            color: var(--neon-green);
-            text-decoration: none;
-            font-family: 'Minecraft', sans-serif;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .mc-btn::before {
-            content: '';
-            position: absolute; top: 0; left: 0; width: 0; height: 100%;
-            background: var(--neon-green);
-            z-index: -1;
-            transition: width 0.3s ease;
+        @media (max-width: 720px) {
+            .shell {
+                width: min(100% - 18px, 1180px);
+                margin: 9px auto;
+                padding: 20px;
+                border-radius: 22px;
+            }
+
+            header,
+            .section-header,
+            .community-card {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .status-pill {
+                white-space: normal;
+            }
+
+            .hero-card,
+            .hero-side,
+            .server-card,
+            .community-card {
+                padding: 20px;
+            }
+
+            .hero-actions {
+                width: 100%;
+                gap: 10px;
+            }
+
+            .primary-btn,
+            .secondary-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .metric-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .metric-value {
+                text-align: left;
+            }
+
+            .community-card .primary-btn {
+                width: 100%;
+            }
         }
 
-        .mc-btn:hover {
-            color: #000;
-            box-shadow: 0 0 20px var(--neon-green);
-        }
-        
-        .mc-btn:hover::before {
-            width: 100%;
-        }
+        @media (max-width: 560px) {
+            .hero {
+                padding: 30px 0 22px;
+            }
 
-        /* Pixel Art Creeper Face - Cyber Version */
-        .creeper-face {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-            background-color: transparent;
-            /* Using neon green for the face pattern */
-            background-image: 
-                linear-gradient(var(--neon-green) 0 0), linear-gradient(var(--neon-green) 0 0), /* Eyes */
-                linear-gradient(var(--neon-green) 0 0), /* Nose */
-                linear-gradient(var(--neon-green) 0 0), linear-gradient(var(--neon-green) 0 0), linear-gradient(var(--neon-green) 0 0); /* Mouth */
-            background-size: 
-                15px 15px, 15px 15px,
-                15px 22.5px,
-                15px 30px, 15px 30px, 30px 15px;
-            background-position: 
-                7.5px 15px, 37.5px 15px,
-                22.5px 30px,
-                15px 37.5px, 30px 37.5px, 15px 37.5px;
-            background-repeat: no-repeat;
-            border: 2px solid var(--neon-green);
-            box-shadow: 0 0 15px var(--neon-green);
-            image-rendering: pixelated;
-            animation: glitch-pulse 3s infinite;
-        }
+            .hero h1 {
+                font-size: clamp(2.15rem, 10vw, 2.8rem);
+            }
 
-        @keyframes glitch-pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); box-shadow: 0 0 25px var(--neon-green); }
-            90% { clip-path: inset(0 0 0 0); }
-            92% { clip-path: inset(10% 0 20% 0); transform: translate(-2px, 2px); }
-            94% { clip-path: inset(0 0 0 0); transform: translate(0); }
+            .hero p,
+            .section-desc,
+            .community-copy,
+            .status-note,
+            .server-card p {
+                font-size: 0.96rem;
+            }
         }
-
     </style>
 </head>
 <body>
-    <div id="cursor"></div>
-    <div class="stars"></div>
-    <div class="grid-floor"></div>
-
-    <div class="container">
+    <main class="shell">
         <header>
-            <div class="logo">XTMC <span>NETWORK</span></div>
-            <div style="font-family: 'Minecraft'; color: var(--neon-green);">系统在线</div>
+            <div>
+                <div class="brand-title">饩雨的妙妙屋 · XTMC NETWORK</div>
+                <div class="brand-subtitle">群组大厅、纯净生存与模组探索，统一入口轻松加入。</div>
+            </div>
+            <div class="status-pill" id="server-status-pill" aria-live="polite">
+                <span class="status-dot"></span>
+                <span id="server-status-text">正在检测服务器状态…</span>
+            </div>
         </header>
 
         <section class="hero">
-            <div id="canvas-container"></div>
-            
-            <div class="hero-badge">BUNGEECORD 群组架构</div>
-            <h1 class="hero-title">多元宇宙<br>无缝链接</h1>
-            <p class="hero-subtitle">一个 IP • 无限可能</p>
-            
-            <div class="ip-wrapper">
-                <div class="ip-btn" data-hover onclick="copyIP()">mc.mai-xiyu.top</div>
+            <div class="hero-card">
+                <div class="eyebrow"><span class="eyebrow-icon" aria-hidden="true">✦</span>毛玻璃主题 · 实时状态展示</div>
+                <h1>欢迎来到<br>更安静、更耐看的服务器首页</h1>
+                <p>
+                    现在首页不再固定写死“系统在线”，而是会自动轮询服务器状态接口，
+                    实时更新在线/离线、版本、玩家人数与最近一次检测时间。整体视觉也改为更柔和的玻璃拟态风格，
+                    避免过于常见的赛博霓虹效果。
+                </p>
+                <div class="hero-actions">
+                    <button class="primary-btn" type="button" id="copy-ip-btn">复制服务器地址：<span id="copy-ip-host"></span></button>
+                    <span class="sr-only" id="copy-status" aria-live="polite"></span>
+                    <a class="secondary-btn" href="https://qm.qq.com/q/JbWcIF8Q8K" target="_blank" rel="noreferrer">加入 QQ 群</a>
+                </div>
             </div>
+
+            <aside class="hero-side glass-card">
+                <div class="metric-list">
+                    <div class="metric-row metric-host">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">⌘</span>
+                            <span class="metric-label">连接地址</span>
+                        </span>
+                        <strong class="metric-value" id="metric-host">--</strong>
+                    </div>
+                    <div class="metric-row metric-status">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">◉</span>
+                            <span class="metric-label">实时状态</span>
+                        </span>
+                        <strong class="metric-value" id="metric-online">检测中</strong>
+                    </div>
+                    <div class="metric-row metric-latency">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">↯</span>
+                            <span class="metric-label">响应耗时</span>
+                        </span>
+                        <strong class="metric-value" id="metric-latency">--</strong>
+                    </div>
+                    <div class="metric-row metric-players">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">👥</span>
+                            <span class="metric-label">在线人数</span>
+                        </span>
+                        <strong class="metric-value" id="metric-players">--</strong>
+                    </div>
+                    <div class="metric-row metric-version">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">🧩</span>
+                            <span class="metric-label">服务器版本</span>
+                        </span>
+                        <strong class="metric-value" id="metric-version">--</strong>
+                    </div>
+                    <div class="metric-row metric-updated">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">⏱</span>
+                            <span class="metric-label">最近检测</span>
+                        </span>
+                        <strong class="metric-value" id="metric-updated">刚刚开始</strong>
+                    </div>
+                </div>
+                <div class="status-note" id="status-note">
+                    正在请求服务器状态，请稍候…
+                </div>
+            </aside>
         </section>
 
-        <section class="servers-section">
+        <section class="section">
             <div class="section-header">
-                <h2 class="section-title">多元玩法 · 自由选择</h2>
-                <p class="section-desc">进入服务器大厅，开启属于你的冒险篇章</p>
+                <div>
+                    <h2 class="section-title"><span class="section-icon" aria-hidden="true">✦</span>多元玩法，自由切换</h2>
+                    <p class="section-desc">保留原有服务器信息，但用更简洁、更日常的展示方式呈现。</p>
+                </div>
             </div>
 
             <div class="server-grid">
-                <!-- Modded Server -->
-                <div class="server-card card-modded" data-hover>
-                    <div class="card-bg"></div>
-                    <div class="card-content">
-                        <i class="fa fa-cogs card-icon"></i>
-                        <h3 class="card-title">Arclight 模组服</h3>
-                        <div class="card-version">版本 1.21.1 • 科技魔法</div>
-                        <p class="card-desc">
-                            基于 Arclight 核心的深度模组体验。通过服务端模组干预游戏机制，
-                            无需客户端安装繁琐整合包即可体验科技、魔法与自动化带来的无限可能。
-                            打破原版限制，重塑世界规则。
-                        </p>
+                <article class="server-card glass-card">
+                    <div class="server-card-header">
+                        <div>
+                            <span class="server-badge"><span class="server-badge-icon" aria-hidden="true">⚙️</span>模组体验</span>
+                            <h3>Arclight 模组服</h3>
+                        </div>
                     </div>
-                </div>
+                    <div class="server-version">版本 1.21.1 · 科技 / 魔法 / 自动化</div>
+                    <p>
+                        基于 Arclight 核心打造的模组玩法，重点放在服务端增强与体验整合。
+                        减少复杂安装门槛，让更多玩家能顺畅进入科技、魔法与自动化的世界。
+                    </p>
+                    <div class="server-tag-list">
+                        <span class="server-tag">低门槛加入</span>
+                        <span class="server-tag">扩展玩法</span>
+                        <span class="server-tag">长期更新</span>
+                    </div>
+                </article>
 
-                <!-- Survival Server -->
-                <div class="server-card card-survival" data-hover>
-                    <div class="card-bg"></div>
-                    <div class="card-content">
-                        <i class="fa fa-leaf card-icon"></i>
-                        <h3 class="card-title">Paper 纯净服</h3>
-                        <div class="card-version">版本 1.21.10 • 原版生存</div>
-                        <p class="card-desc">
-                            基于 Paper 高性能核心的纯净生存。实时跟进 Minecraft 最新版本，
-                            体验最新的特性与生物。在这里，回归最纯粹的探索、建造与红石机械，
-                            与社区玩家共同书写原版传奇。
-                        </p>
+                <article class="server-card glass-card">
+                    <div class="server-card-header">
+                        <div>
+                            <span class="server-badge"><span class="server-badge-icon" aria-hidden="true">⛏️</span>纯净生存</span>
+                            <h3>Paper 原版服</h3>
+                        </div>
                     </div>
-                </div>
+                    <div class="server-version">版本 1.21.10 · 探索 / 建造 / 社区联机</div>
+                    <p>
+                        基于 Paper 的高性能生存环境，专注原版体验与稳定游玩。
+                        适合喜欢最新内容、轻量社交与长期建设的玩家共同发展世界。
+                    </p>
+                    <div class="server-tag-list">
+                        <span class="server-tag">原版体验</span>
+                        <span class="server-tag">高性能核心</span>
+                        <span class="server-tag">社区协作</span>
+                    </div>
+                </article>
             </div>
         </section>
 
-        <!-- Minecraft Legacy Section -->
-        <section class="mc-section">
-            <div class="mc-container" data-hover>
-                <div class="creeper-face"></div>
-                <h3 class="mc-title">加入冒险者公会</h3>
-                <p class="mc-desc">
-                    寻找志同道合的伙伴？加入我们的 QQ 群！<br>
-                    <span style="font-size: 0.9rem; color: var(--neon-blue); opacity: 0.8;">(在这里，我们不谈代码，只谈方块)</span>
+        <section class="community-card glass-card">
+            <div>
+                <h2 class="section-title"><span class="section-icon" aria-hidden="true">✦</span>加入冒险者公会</h2>
+                <p class="community-copy">
+                    想要第一时间获取开服、更新与活动消息，可以直接加入 QQ 群。
+                    日常交流、组队游玩、反馈建议都更方便。
                 </p>
-                <a href="https://qm.qq.com/q/JbWcIF8Q8K" target="_blank" class="mc-btn">点击加入 QQ 群</a>
             </div>
+            <a class="primary-btn" href="https://qm.qq.com/q/JbWcIF8Q8K" target="_blank" rel="noreferrer">点击加入 QQ 群</a>
         </section>
 
         <footer>
             <p>&copy; 2025-2026 饩雨的妙妙屋 | XTMC NETWORK</p>
         </footer>
-    </div>
+    </main>
 
     <script>
-        // Cursor
-        const cursor = document.getElementById('cursor');
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-        document.querySelectorAll('[data-hover]').forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
-        });
-
-        // Copy IP
-        function copyIP() {
-            navigator.clipboard.writeText('play.xtmc.xyz');
-            const btn = document.querySelector('.ip-btn');
-            const original = btn.innerText;
-            btn.innerText = 'IP 已复制';
-            btn.style.borderColor = '#00ff9d';
-            btn.style.color = '#00ff9d';
-            setTimeout(() => {
-                btn.innerText = original;
-                btn.style.borderColor = '';
-                btn.style.color = '';
-            }, 2000);
-        }
-
-        // Three.js Scene
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        
-        const container = document.getElementById('canvas-container');
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
-
-        // Create two orbiting planets representing the servers
-        const group = new THREE.Group();
-        
-        // Planet 1 (Modded - Purple)
-        const geo1 = new THREE.IcosahedronGeometry(1.5, 1);
-        const mat1 = new THREE.MeshBasicMaterial({ color: 0xbd00ff, wireframe: true });
-        const planet1 = new THREE.Mesh(geo1, mat1);
-        planet1.position.x = -3;
-        
-        // Planet 2 (Survival - Green)
-        const geo2 = new THREE.IcosahedronGeometry(1.2, 1);
-        const mat2 = new THREE.MeshBasicMaterial({ color: 0x00ff9d, wireframe: true });
-        const planet2 = new THREE.Mesh(geo2, mat2);
-        planet2.position.x = 3;
-
-        // Connecting Line
-        const lineGeo = new THREE.BufferGeometry().setFromPoints([planet1.position, planet2.position]);
-        const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2 });
-        const connection = new THREE.Line(lineGeo, lineMat);
-
-        group.add(planet1);
-        group.add(planet2);
-        group.add(connection);
-        
-        // Add particles
-        const particlesGeo = new THREE.BufferGeometry();
-        const particleCount = 200;
-        const posArray = new Float32Array(particleCount * 3);
-        for(let i=0; i<particleCount*3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 15;
-        }
-        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMat = new THREE.PointsMaterial({ size: 0.05, color: 0x00f3ff });
-        const particles = new THREE.Points(particlesGeo, particlesMat);
-        
-        scene.add(group);
-        scene.add(particles);
-
-        camera.position.z = 8;
-
-        // Animation
-        let time = 0;
-        function animate() {
-            requestAnimationFrame(animate);
-            time += 0.005;
-
-            // Rotate whole system
-            group.rotation.y = time * 0.5;
-            group.rotation.z = Math.sin(time * 0.5) * 0.1;
-
-            // Rotate individual planets
-            planet1.rotation.x += 0.01;
-            planet1.rotation.y += 0.01;
-            planet2.rotation.x += 0.01;
-            planet2.rotation.y += 0.01;
-
-            // Pulse effect
-            planet1.scale.setScalar(1 + Math.sin(time * 2) * 0.1);
-            planet2.scale.setScalar(1 + Math.cos(time * 2) * 0.1);
-
-            // Update connection line
-            // (In a real complex scene we'd update vertices, but here they are static relative to group)
-
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Resize
-        window.addEventListener('resize', () => {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        });
-
-        // Intro Animation
-        gsap.from('.hero-title', { duration: 1.5, y: 100, opacity: 0, ease: 'power4.out', delay: 0.5 });
-        gsap.from('.hero-subtitle', { duration: 1.5, y: 50, opacity: 0, ease: 'power4.out', delay: 0.8 });
-        gsap.from('.ip-btn', { duration: 1, scale: 0.8, opacity: 0, ease: 'back.out(1.7)', delay: 1.2 });
-        gsap.from('.server-card', { 
-            duration: 1, 
-            y: 100, 
-            opacity: 0, 
-            stagger: 0.2, 
-            ease: 'power4.out', 
-            scrollTrigger: '.servers-section' // Simple trigger if scrollTrigger was loaded, else just plays
-        });
-
-        // Simple Scroll Animation for MC Section
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    gsap.from('.mc-container', { 
-                        duration: 1.5, 
-                        y: -100, 
-                        opacity: 0, 
-                        ease: 'bounce.out' 
-                    });
-                    observer.unobserve(entry.target);
+        const SERVER_HOST = 'mc.mai-xiyu.top';
+        const REQUEST_TIMEOUT_MS = 5000;
+        const STATUS_SOURCES = [
+            {
+                name: 'mcstatus.io',
+                url: `https://api.mcstatus.io/v2/status/java/${SERVER_HOST}`,
+                parse(data) {
+                    return {
+                        online: Boolean(data.online),
+                        playersOnline: getPlayerCount(data.players, 'online'),
+                        playersMax: getPlayerCount(data.players, 'max'),
+                        version: data.version?.name_clean ?? data.version?.name_raw ?? '--'
+                    };
                 }
-            });
-        }, { threshold: 0.1 });
-        
-        const mcSection = document.querySelector('.mc-section');
-        if (mcSection) observer.observe(mcSection);
+            },
+            {
+                name: 'mcsrvstat.us',
+                url: `https://api.mcsrvstat.us/3/${SERVER_HOST}`,
+                parse(data) {
+                    return {
+                        online: Boolean(data.online),
+                        playersOnline: getPlayerCount(data.players, 'online'),
+                        playersMax: getPlayerCount(data.players, 'max'),
+                        version: data.version || '--'
+                    };
+                }
+            }
+        ];
+        const statusPill = document.getElementById('server-status-pill');
+        const statusText = document.getElementById('server-status-text');
+        const statusNote = document.getElementById('status-note');
+        const metricOnline = document.getElementById('metric-online');
+        const metricLatency = document.getElementById('metric-latency');
+        const metricPlayers = document.getElementById('metric-players');
+        const metricVersion = document.getElementById('metric-version');
+        const metricUpdated = document.getElementById('metric-updated');
+        const metricHost = document.getElementById('metric-host');
+        const copyIpHost = document.getElementById('copy-ip-host');
+        const copyButton = document.getElementById('copy-ip-btn');
+        const copyStatus = document.getElementById('copy-status');
+
+        metricHost.textContent = SERVER_HOST;
+        copyIpHost.textContent = SERVER_HOST;
+        copyButton.setAttribute('aria-label', `复制服务器地址 ${SERVER_HOST}`);
+
+        function formatCheckedTime(date) {
+            return new Intl.DateTimeFormat('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).format(date);
+        }
+
+        function setStatusAppearance(mode, label) {
+            statusPill.classList.remove('online', 'offline');
+            if (mode === 'online' || mode === 'offline') {
+                statusPill.classList.add(mode);
+            }
+            statusText.textContent = label;
+            metricOnline.textContent = label;
+        }
+
+        function getPlayerCount(players, key) {
+            return players && typeof players[key] === 'number' ? players[key] : '--';
+        }
+
+        async function requestStatusFromSource(source) {
+            const start = performance.now();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+            try {
+                const response = await fetch(source.url, {
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                return {
+                    source: source.name,
+                    latency: Math.round(performance.now() - start),
+                    ...source.parse(data)
+                };
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        async function updateServerStatus() {
+            setStatusAppearance('pending', '检测中');
+            statusNote.textContent = '正在请求服务器状态，请稍候…';
+
+            try {
+                let resolvedStatus = null;
+                let lastError = null;
+
+                for (const source of STATUS_SOURCES) {
+                    try {
+                        resolvedStatus = await requestStatusFromSource(source);
+                        break;
+                    } catch (error) {
+                        lastError = error;
+                    }
+                }
+
+                if (!resolvedStatus) {
+                    throw lastError || new Error('No status source available');
+                }
+
+                const checkedAt = formatCheckedTime(new Date());
+                const hasPlayerCount = resolvedStatus.playersOnline !== '--' && resolvedStatus.playersMax !== '--';
+
+                if (resolvedStatus.online) {
+                    setStatusAppearance('online', '在线');
+                    metricLatency.textContent = `${resolvedStatus.latency} ms`;
+                    metricPlayers.textContent = `${resolvedStatus.playersOnline} / ${resolvedStatus.playersMax}`;
+                    metricVersion.textContent = resolvedStatus.version || '已连接';
+                    metricUpdated.textContent = checkedAt;
+                    statusNote.textContent = hasPlayerCount
+                        ? `服务器在线，已通过 ${resolvedStatus.source} 更新最新状态。当前人数 ${resolvedStatus.playersOnline} / ${resolvedStatus.playersMax}。`
+                        : `服务器在线，已通过 ${resolvedStatus.source} 更新最新状态。`;
+                } else {
+                    setStatusAppearance('offline', '离线');
+                    metricLatency.textContent = `${resolvedStatus.latency} ms`;
+                    metricPlayers.textContent = '0 / --';
+                    metricVersion.textContent = resolvedStatus.version || '--';
+                    metricUpdated.textContent = checkedAt;
+                    statusNote.textContent = `状态接口 ${resolvedStatus.source} 返回服务器离线，页面会继续自动刷新检测。`;
+                }
+            } catch (error) {
+                setStatusAppearance('offline', '暂时不可达');
+                metricLatency.textContent = '--';
+                metricPlayers.textContent = '--';
+                metricVersion.textContent = '--';
+                metricUpdated.textContent = formatCheckedTime(new Date());
+                statusNote.textContent = '本次状态请求失败，可能是网络波动或接口暂时不可用，稍后会自动重试。';
+            }
+        }
+
+        copyButton.addEventListener('click', async () => {
+            const originalLabel = copyButton.textContent;
+            try {
+                if (!navigator.clipboard?.writeText) {
+                    throw new Error('clipboardUnavailable');
+                }
+                await navigator.clipboard.writeText(SERVER_HOST);
+                copyButton.textContent = `已复制：${SERVER_HOST}`;
+                copyStatus.textContent = `已复制服务器地址 ${SERVER_HOST}`;
+                copyButton.setAttribute('aria-label', `已复制服务器地址 ${SERVER_HOST}`);
+            } catch (error) {
+                const clipboardUnavailable = error instanceof Error && error.message === 'clipboardUnavailable';
+                copyButton.textContent = clipboardUnavailable
+                    ? '当前浏览器不支持自动复制'
+                    : `复制失败，请手动复制地址：${SERVER_HOST}`;
+                copyStatus.textContent = copyButton.textContent;
+                copyButton.setAttribute('aria-label', copyButton.textContent);
+            }
+
+            window.setTimeout(() => {
+                copyButton.textContent = originalLabel;
+                copyStatus.textContent = '';
+                copyButton.setAttribute('aria-label', `复制服务器地址 ${SERVER_HOST}`);
+            }, 2200);
+        });
+
+        updateServerStatus();
+        window.setInterval(updateServerStatus, 60000);
     </script>
 </body>
 </html>
-
-
-
