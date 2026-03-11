@@ -14,6 +14,7 @@
             --bg: #09111f;
             --bg-soft: rgba(9, 17, 31, 0.72);
             --panel: rgba(255, 255, 255, 0.1);
+            --panel-soft: rgba(255, 255, 255, 0.06);
             --panel-strong: rgba(255, 255, 255, 0.14);
             --border: rgba(255, 255, 255, 0.18);
             --text: #f5f7fb;
@@ -79,6 +80,15 @@
             box-shadow: var(--shadow);
             backdrop-filter: blur(22px);
             -webkit-backdrop-filter: blur(22px);
+            overflow: hidden;
+        }
+
+        .shell::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 18%);
+            pointer-events: none;
         }
 
         header {
@@ -113,6 +123,9 @@
             color: var(--text);
             font-size: 0.95rem;
             white-space: nowrap;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .status-dot {
@@ -127,6 +140,7 @@
         .status-pill.online .status-dot {
             background: var(--success);
             box-shadow: 0 0 0 6px rgba(120, 219, 169, 0.14);
+            animation: pulse 2.2s ease-in-out infinite;
         }
 
         .status-pill.offline .status-dot {
@@ -137,8 +151,8 @@
         .hero {
             display: grid;
             grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
-            gap: 24px;
-            padding: 42px 0 28px;
+            gap: 28px;
+            padding: 46px 0 34px;
             align-items: stretch;
         }
 
@@ -153,9 +167,18 @@
         }
 
         .hero-card {
-            padding: 32px;
+            padding: 36px;
             position: relative;
             overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.22), transparent 72%);
+            pointer-events: none;
         }
 
         .hero-card::after {
@@ -179,12 +202,22 @@
             background: rgba(139, 196, 255, 0.12);
             color: #d9ecff;
             font-size: 0.9rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .eyebrow-icon,
+        .section-icon,
+        .server-badge-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .hero h1 {
             font-size: clamp(2.6rem, 5.5vw, 4.8rem);
             line-height: 1.08;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.03em;
+            text-shadow: 0 0 28px rgba(139, 196, 255, 0.12);
         }
 
         .hero p {
@@ -200,6 +233,7 @@
             flex-wrap: wrap;
             gap: 14px;
             margin-top: 28px;
+            align-items: stretch;
         }
 
         .primary-btn,
@@ -211,6 +245,9 @@
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
             text-decoration: none;
+            justify-content: center;
+            align-items: center;
+            display: inline-flex;
         }
 
         .sr-only {
@@ -244,25 +281,61 @@
         }
 
         .hero-side {
-            padding: 24px;
+            padding: 26px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 18px;
         }
 
         .metric-list {
             display: grid;
-            gap: 12px;
+            gap: 16px;
         }
 
         .metric-row {
             display: flex;
             justify-content: space-between;
-            gap: 14px;
-            padding: 14px 16px;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 18px;
             border-radius: 18px;
-            background: var(--panel);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.06));
             border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .metric-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .metric-icon {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #e4f1ff;
+            flex-shrink: 0;
+        }
+
+        .metric-row.metric-host .metric-icon,
+        .metric-row.metric-latency .metric-icon {
+            background: rgba(139, 196, 255, 0.14);
+        }
+
+        .metric-row.metric-status .metric-icon,
+        .metric-row.metric-players .metric-icon {
+            background: rgba(120, 219, 169, 0.14);
+        }
+
+        .metric-row.metric-version .metric-icon,
+        .metric-row.metric-updated .metric-icon {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .metric-label {
@@ -276,16 +349,17 @@
         }
 
         .status-note {
-            padding: 14px 16px;
-            border-radius: 16px;
-            background: rgba(120, 219, 169, 0.08);
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(120, 219, 169, 0.08), rgba(139, 196, 255, 0.08));
             color: #d8f7e6;
             font-size: 0.95rem;
             line-height: 1.7;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .section {
-            margin-top: 24px;
+            margin-top: 30px;
         }
 
         .section-header {
@@ -293,10 +367,13 @@
             justify-content: space-between;
             align-items: end;
             gap: 18px;
-            margin-bottom: 18px;
+            margin-bottom: 22px;
         }
 
         .section-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
             font-size: clamp(1.6rem, 3vw, 2.2rem);
             font-weight: 700;
         }
@@ -310,11 +387,24 @@
         .server-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 18px;
+            gap: 22px;
         }
 
         .server-card {
-            padding: 24px;
+            padding: 26px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .server-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -3rem -4rem auto;
+            width: 10rem;
+            height: 10rem;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 196, 255, 0.16), transparent 68%);
+            pointer-events: none;
         }
 
         .server-card-header {
@@ -326,11 +416,15 @@
 
         .server-badge {
             display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 6px 12px;
             border-radius: 999px;
             font-size: 0.86rem;
             background: rgba(255, 255, 255, 0.08);
             color: #dce9f8;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
 
         .server-card h3 {
@@ -347,7 +441,7 @@
         .server-card p {
             margin-top: 16px;
             color: var(--muted);
-            line-height: 1.82;
+            line-height: 1.92;
         }
 
         .server-tag-list {
@@ -363,20 +457,25 @@
             background: rgba(255, 255, 255, 0.07);
             color: #dce7f6;
             font-size: 0.9rem;
+            border: 1px solid rgba(139, 196, 255, 0.16);
         }
 
         .community-card {
-            margin-top: 18px;
-            padding: 24px;
+            margin-top: 22px;
+            padding: 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 18px;
+            gap: 24px;
         }
 
         .community-copy {
             color: var(--muted);
             line-height: 1.75;
+        }
+
+        .community-card .primary-btn {
+            flex-shrink: 0;
         }
 
         footer {
@@ -386,6 +485,15 @@
             text-align: center;
             color: rgba(245, 247, 251, 0.55);
             font-size: 0.92rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.08);
+            }
         }
 
         @media (max-width: 960px) {
@@ -430,12 +538,44 @@
 
             .hero-actions {
                 width: 100%;
+                gap: 10px;
             }
 
             .primary-btn,
             .secondary-btn {
                 width: 100%;
                 text-align: center;
+            }
+
+            .metric-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .metric-value {
+                text-align: left;
+            }
+
+            .community-card .primary-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .hero {
+                padding: 30px 0 22px;
+            }
+
+            .hero h1 {
+                font-size: clamp(2.15rem, 10vw, 2.8rem);
+            }
+
+            .hero p,
+            .section-desc,
+            .community-copy,
+            .status-note,
+            .server-card p {
+                font-size: 0.96rem;
             }
         }
     </style>
@@ -455,7 +595,7 @@
 
         <section class="hero">
             <div class="hero-card">
-                <div class="eyebrow">毛玻璃主题 · 实时状态展示</div>
+                <div class="eyebrow"><span class="eyebrow-icon" aria-hidden="true">✦</span>毛玻璃主题 · 实时状态展示</div>
                 <h1>欢迎来到<br>更安静、更耐看的服务器首页</h1>
                 <p>
                     现在首页不再固定写死“系统在线”，而是会自动轮询服务器状态接口，
@@ -471,28 +611,46 @@
 
             <aside class="hero-side glass-card">
                 <div class="metric-list">
-                    <div class="metric-row">
-                        <span class="metric-label">连接地址</span>
+                    <div class="metric-row metric-host">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">⌘</span>
+                            <span class="metric-label">连接地址</span>
+                        </span>
                         <strong class="metric-value" id="metric-host">--</strong>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">实时状态</span>
+                    <div class="metric-row metric-status">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">◉</span>
+                            <span class="metric-label">实时状态</span>
+                        </span>
                         <strong class="metric-value" id="metric-online">检测中</strong>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">响应耗时</span>
+                    <div class="metric-row metric-latency">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">↯</span>
+                            <span class="metric-label">响应耗时</span>
+                        </span>
                         <strong class="metric-value" id="metric-latency">--</strong>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">在线人数</span>
+                    <div class="metric-row metric-players">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">👥</span>
+                            <span class="metric-label">在线人数</span>
+                        </span>
                         <strong class="metric-value" id="metric-players">--</strong>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">服务器版本</span>
+                    <div class="metric-row metric-version">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">🧩</span>
+                            <span class="metric-label">服务器版本</span>
+                        </span>
                         <strong class="metric-value" id="metric-version">--</strong>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">最近检测</span>
+                    <div class="metric-row metric-updated">
+                        <span class="metric-info">
+                            <span class="metric-icon" aria-hidden="true">⏱</span>
+                            <span class="metric-label">最近检测</span>
+                        </span>
                         <strong class="metric-value" id="metric-updated">刚刚开始</strong>
                     </div>
                 </div>
@@ -505,7 +663,7 @@
         <section class="section">
             <div class="section-header">
                 <div>
-                    <h2 class="section-title">多元玩法，自由切换</h2>
+                    <h2 class="section-title"><span class="section-icon" aria-hidden="true">✦</span>多元玩法，自由切换</h2>
                     <p class="section-desc">保留原有服务器信息，但用更简洁、更日常的展示方式呈现。</p>
                 </div>
             </div>
@@ -514,7 +672,7 @@
                 <article class="server-card glass-card">
                     <div class="server-card-header">
                         <div>
-                            <span class="server-badge">模组体验</span>
+                            <span class="server-badge"><span class="server-badge-icon" aria-hidden="true">⚙️</span>模组体验</span>
                             <h3>Arclight 模组服</h3>
                         </div>
                     </div>
@@ -533,7 +691,7 @@
                 <article class="server-card glass-card">
                     <div class="server-card-header">
                         <div>
-                            <span class="server-badge">纯净生存</span>
+                            <span class="server-badge"><span class="server-badge-icon" aria-hidden="true">⛏️</span>纯净生存</span>
                             <h3>Paper 原版服</h3>
                         </div>
                     </div>
@@ -553,7 +711,7 @@
 
         <section class="community-card glass-card">
             <div>
-                <h2 class="section-title">加入冒险者公会</h2>
+                <h2 class="section-title"><span class="section-icon" aria-hidden="true">✦</span>加入冒险者公会</h2>
                 <p class="community-copy">
                     想要第一时间获取开服、更新与活动消息，可以直接加入 QQ 群。
                     日常交流、组队游玩、反馈建议都更方便。
@@ -722,7 +880,8 @@
                 copyStatus.textContent = `已复制服务器地址 ${SERVER_HOST}`;
                 copyButton.setAttribute('aria-label', `已复制服务器地址 ${SERVER_HOST}`);
             } catch (error) {
-                copyButton.textContent = error?.message === 'clipboardUnavailable'
+                const clipboardUnavailable = error instanceof Error && error.message === 'clipboardUnavailable';
+                copyButton.textContent = clipboardUnavailable
                     ? '当前浏览器不支持自动复制'
                     : `复制失败，请手动复制地址：${SERVER_HOST}`;
                 copyStatus.textContent = copyButton.textContent;
