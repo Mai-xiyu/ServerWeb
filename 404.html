@@ -207,10 +207,15 @@
 
         <div class="actions">
             <a href="/" class="btn btn-primary">返回首页</a>
-            <a href="javascript:history.back()" class="btn btn-secondary">返回上一页</a>
+            <button type="button" class="btn btn-secondary" id="go-back-btn">返回上一页</button>
         </div>
 
         <div class="footer-note">XTMC NETWORK · 饩雨的妙妙屋</div>
     </main>
+    <script>
+        document.getElementById('go-back-btn').addEventListener('click', () => {
+            window.history.back();
+        });
+    </script>
 </body>
 </html>

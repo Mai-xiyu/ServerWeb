@@ -213,6 +213,18 @@
             text-decoration: none;
         }
 
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         .primary-btn {
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
             color: #06111f;
@@ -451,7 +463,8 @@
                     避免过于常见的赛博霓虹效果。
                 </p>
                 <div class="hero-actions">
-                    <button class="primary-btn" type="button" id="copy-ip-btn">复制服务器地址</button>
+                    <button class="primary-btn" type="button" id="copy-ip-btn">复制服务器地址：<span id="copy-ip-host"></span></button>
+                    <span class="sr-only" id="copy-status" aria-live="polite"></span>
                     <a class="secondary-btn" href="https://qm.qq.com/q/JbWcIF8Q8K" target="_blank" rel="noreferrer">加入 QQ 群</a>
                 </div>
             </div>
@@ -565,7 +578,7 @@
                         online: Boolean(data.online),
                         playersOnline: getPlayerCount(data.players, 'online'),
                         playersMax: getPlayerCount(data.players, 'max'),
-                        version: data.version?.name_clean || data.version?.name_raw || '--'
+                        version: data.version?.name_clean ?? data.version?.name_raw ?? '--'
                     };
                 }
             },
@@ -591,10 +604,13 @@
         const metricVersion = document.getElementById('metric-version');
         const metricUpdated = document.getElementById('metric-updated');
         const metricHost = document.getElementById('metric-host');
+        const copyIpHost = document.getElementById('copy-ip-host');
         const copyButton = document.getElementById('copy-ip-btn');
+        const copyStatus = document.getElementById('copy-status');
 
-        copyButton.textContent = `复制服务器地址：${SERVER_HOST}`;
         metricHost.textContent = SERVER_HOST;
+        copyIpHost.textContent = SERVER_HOST;
+        copyButton.setAttribute('aria-label', `复制服务器地址 ${SERVER_HOST}`);
 
         function formatCheckedTime(date) {
             return new Intl.DateTimeFormat('zh-CN', {
@@ -694,19 +710,25 @@
         copyButton.addEventListener('click', async () => {
             const originalLabel = copyButton.textContent;
             try {
-                if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
-                    throw new Error('clipboard-unavailable');
+                if (!navigator.clipboard?.writeText) {
+                    throw new Error('clipboardUnavailable');
                 }
                 await navigator.clipboard.writeText(SERVER_HOST);
                 copyButton.textContent = `已复制：${SERVER_HOST}`;
+                copyStatus.textContent = `已复制服务器地址 ${SERVER_HOST}`;
+                copyButton.setAttribute('aria-label', `已复制服务器地址 ${SERVER_HOST}`);
             } catch (error) {
-                copyButton.textContent = error?.message === 'clipboard-unavailable'
+                copyButton.textContent = error?.message === 'clipboardUnavailable'
                     ? '当前浏览器不支持自动复制'
-                    : '复制失败，请手动选择地址或检查权限';
+                    : `复制失败，请手动复制地址：${SERVER_HOST}`;
+                copyStatus.textContent = copyButton.textContent;
+                copyButton.setAttribute('aria-label', copyButton.textContent);
             }
 
             window.setTimeout(() => {
                 copyButton.textContent = originalLabel;
+                copyStatus.textContent = '';
+                copyButton.setAttribute('aria-label', `复制服务器地址 ${SERVER_HOST}`);
             }, 2200);
         });
 
