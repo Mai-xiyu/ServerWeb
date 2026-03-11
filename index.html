@@ -569,6 +569,7 @@
 
     <script>
         const SERVER_HOST = 'mc.mai-xiyu.top';
+        const REQUEST_TIMEOUT_MS = 5000;
         const STATUS_SOURCES = [
             {
                 name: 'mcstatus.io',
@@ -636,7 +637,7 @@
         async function requestStatusFromSource(source) {
             const start = performance.now();
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
             try {
                 const response = await fetch(source.url, {
@@ -681,6 +682,7 @@
                 }
 
                 const checkedAt = formatCheckedTime(new Date());
+                const hasPlayerCount = resolvedStatus.playersOnline !== '--' && resolvedStatus.playersMax !== '--';
 
                 if (resolvedStatus.online) {
                     setStatusAppearance('online', '在线');
@@ -688,7 +690,9 @@
                     metricPlayers.textContent = `${resolvedStatus.playersOnline} / ${resolvedStatus.playersMax}`;
                     metricVersion.textContent = resolvedStatus.version || '已连接';
                     metricUpdated.textContent = checkedAt;
-                    statusNote.textContent = `服务器在线，已通过 ${resolvedStatus.source} 更新最新状态。当前人数 ${resolvedStatus.playersOnline} / ${resolvedStatus.playersMax}。`;
+                    statusNote.textContent = hasPlayerCount
+                        ? `服务器在线，已通过 ${resolvedStatus.source} 更新最新状态。当前人数 ${resolvedStatus.playersOnline} / ${resolvedStatus.playersMax}。`
+                        : `服务器在线，已通过 ${resolvedStatus.source} 更新最新状态。`;
                 } else {
                     setStatusAppearance('offline', '离线');
                     metricLatency.textContent = `${resolvedStatus.latency} ms`;
